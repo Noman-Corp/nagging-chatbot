@@ -1,8 +1,11 @@
-from flask import Flask
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from utils.groq_client import ask_groq
 
 app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return render_template("index.html")
 
 @app.route("/ask", methods=["POST"])
 def ask():
@@ -13,16 +16,6 @@ def ask():
 
     user_msg = data["message"]
 
-    if not isinstance(user_msg, str):
-        return jsonify({"error": "'message' must be a string"}), 400
-
-    if user_msg.strip() == "":
-        return jsonify({"error": "Message cannot be empty"}), 400
-
-    if len(user_msg) > 500:
-        return jsonify({"error": "Message too long (max 500 chars)"}), 400
-
-    # 
     try:
         reply = ask_groq(user_msg)
         return jsonify({"reply": reply})
